@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.sopra.backend.qualitytool.controller")
+@ComponentScan(basePackages = "com.sopra.backend.qualitytool")
 public class ToolsApplication {
 
 	private static final Logger log = LoggerFactory
