@@ -10,8 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.sopra.backend.qualitytool")
 public class ToolsApplication {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(ToolsApplication.class);
+	private static final Logger log = LoggerFactory.getLogger(ToolsApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(ToolsApplication.class, args);

@@ -13,15 +13,14 @@ import com.sopra.backend.qualitytool.service.FileService;
 @RestController
 public class FileController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
-	
-	@Autowired 
-	private FileService fileService;
-	
-	@PostMapping("/quality/processQualityData")
-	public void processQualityData(@RequestBody FileDto fileDto) {
-		LOGGER.info(" Design Review File path !!" + fileDto.getDesignReviewFilePath());
-		fileService.processQualityData(fileDto);
-    
-	}
 
+	@Autowired
+	private FileService fileService;
+
+	@PostMapping("/quality/processQualityData")
+	public void getFilePath(@RequestBody FileDto fileDto) {
+		LOGGER.info(" File paths !!" + fileDto);
+		fileService.processQualityData(fileDto);
+
+	}
 }
