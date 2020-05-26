@@ -19,7 +19,7 @@ public class FileController {
 
 	@PostMapping("/quality/processQualityData")
 	public void getFilePath(@RequestBody FileDto fileDto) {
-		LOGGER.info(" File paths !!" + fileDto);
+		LOGGER.info(" File paths !!" + fileDto+"\n\n");
 		fileService.processQualityData(fileDto);
 
 	}

@@ -174,8 +174,13 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 								}
 							}
 						}
+						System.out.println("efforts: "+efforts);
 						if (efforts != null) {
 							row.getCell(qualityDataColumnsDto.getEffortsColumnIndex()).setCellValue(efforts);
+						}
+						
+						if(efforts != null && efforts == 0.0){
+							row.getCell(qualityDataColumnsDto.getDdbdColumnIndex()).setCellType(CellType.BLANK);
 						}
 						row.getCell(qualityDataColumnsDto.getBlockerColumnIndex())
 								.setCellValue(qualityDataDto.getBlocker());
@@ -285,8 +290,10 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 				CellAddress minorCellAddress = newRow.getCell(qualityDataColumnsDto.getMinorColumnIndex()).getAddress();
 				CellAddress effortsCellAddress = newRow.getCell(qualityDataColumnsDto.getEffortsColumnIndex())
 						.getAddress();
-				cell.setCellFormula("(" + blockerCellAddress + "*1+" + majorCellAddress + "*0.5+" + minorCellAddress
-						+ "*0.25)/" + effortsCellAddress + "*10");
+				if(Objects.nonNull(newRow.getCell(qualityDataColumnsDto.getEffortsColumnIndex()).getNumericCellValue()) && newRow.getCell(qualityDataColumnsDto.getEffortsColumnIndex()).getNumericCellValue()!= 0){
+					cell.setCellFormula("(" + blockerCellAddress + "*1+" + majorCellAddress + "*0.5+" + minorCellAddress
+							+ "*0.25)/" + effortsCellAddress + "*10");
+				}
 				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getRecordUpdatedColumnIndex()) {
 				Calendar calendar = Calendar.getInstance();

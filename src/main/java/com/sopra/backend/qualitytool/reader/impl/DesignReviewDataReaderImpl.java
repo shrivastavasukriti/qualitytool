@@ -92,6 +92,8 @@ public class DesignReviewDataReaderImpl implements DesignReviewDataReader {
 		}
 		if (countColumnIndex == NO_COLUMNS) {
 			flagFound = true;
+		}else{
+			LOGGER.error("Column Indices not found !!");
 		}
 		return flagFound;
 	}

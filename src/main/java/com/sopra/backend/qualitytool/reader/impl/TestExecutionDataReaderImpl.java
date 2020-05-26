@@ -78,8 +78,9 @@ public class TestExecutionDataReaderImpl implements TestExecutionDataReader {
 			}
 		}
 		if (countColumnIndex == NO_COLUMNS) {
-			LOGGER.info("Column Indices found !!");
 			flagFound = true;
+		}else{
+			LOGGER.error("Column Indices not found !!");
 		}
 		return flagFound;
 	}

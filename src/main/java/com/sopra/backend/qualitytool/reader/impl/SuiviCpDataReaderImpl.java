@@ -117,6 +117,8 @@ public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 		if (countColumnIndex == NO_COLUMNS && Objects.nonNull(suiviCpSourceFileDto.getFixBugsRowIndex())) {
 			suiviCpSourceFileDtoList.add(suiviCpSourceFileDto);
 			flagFound = true;
+		}else{
+			LOGGER.error("Column Indices not found !!");
 		}
 		return flagFound;
 	}

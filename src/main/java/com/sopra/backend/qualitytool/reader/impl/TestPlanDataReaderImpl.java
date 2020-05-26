@@ -85,6 +85,8 @@ public class TestPlanDataReaderImpl implements TestPlanDataReader {
 		}
 		if (countColumnIndex == NO_COLUMNS) {
 			flagFound = true;
+		}else{
+			LOGGER.error("Column Indices not found !!");
 		}
 		return flagFound;
 	}
