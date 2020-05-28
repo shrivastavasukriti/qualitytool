@@ -15,7 +15,6 @@ import com.sopra.backend.qualitytool.controller.FileController;
 import com.sopra.backend.qualitytool.dto.FileDto;
 import com.sopra.backend.qualitytool.model.destination.QualityDataColumnsDto;
 import com.sopra.backend.qualitytool.model.source.DesignReviewSourceFileDto;
-import com.sopra.backend.qualitytool.model.source.EffortsDto;
 import com.sopra.backend.qualitytool.model.source.QualityDataDto;
 import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDto;
 import com.sopra.backend.qualitytool.model.source.TestExecutionSourceFileDto;
@@ -51,17 +50,31 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public void processQualityData(FileDto fileDto) {
 		try {
-			List<EffortsDto> effortsDtoList = new ArrayList<>();
 			if (Objects.nonNull(fileDto.getSuiviCpFilePath())) {
+				List<QualityDataDto> listQualityData = new ArrayList<>();
 				List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList = new ArrayList<>();
 				/* Reading and verifying SuiviCp file */
 				List<XSSFSheet> suiviCPspreadsheetList = suiviCpDataReader.readSuiviCpFile(fileDto.getSuiviCpFilePath(),
 						suiviCpSourceFileDtoList);
 				if (Objects.nonNull(suiviCPspreadsheetList) && suiviCPspreadsheetList.size() > 0) {
 					LOGGER.info("Suivi Cp file read successfully !!!\n\n");
-					suiviCpDataReader.filteringData(suiviCPspreadsheetList, suiviCpSourceFileDtoList, effortsDtoList);
+					suiviCpDataReader.filteringData(suiviCPspreadsheetList, suiviCpSourceFileDtoList, listQualityData);
+				}
+				LOGGER.info("Suivi Cp file filtered !!!");
+				QualityDataColumnsDto qualityDataColumnsDto = new QualityDataColumnsDto();
+				XSSFSheet qualityDataSheet = qualityDataWriter.readQualityFile(destinationFilename,
+						qualityDataColumnsDto);
+				if (Objects.nonNull(qualityDataSheet)) {
+					qualityDataWriter.updateOrCreateRecord(qualityDataColumnsDto,
+							qualityDataSheet, listQualityData);
+						Boolean flagWriteFile = Boolean.FALSE;
+						flagWriteFile = qualityDataWriter.writeToFile(destinationFilename);
+						if (flagWriteFile) {
+							LOGGER.info("Quality Data file written for Efforts!!\n\n");
+						}
 				}
 			}
+
 
 			if (Objects.nonNull(fileDto.getDesignReviewFilePath())) {
 				List<QualityDataDto> listQualityData = new ArrayList<>();
@@ -79,15 +92,13 @@ public class FileServiceImpl implements FileService {
 						XSSFSheet qualityDataSheet = qualityDataWriter.readQualityFile(destinationFilename,
 								qualityDataColumnsDto);
 						if (Objects.nonNull(qualityDataSheet)) {
-							List<Boolean> recordCreatedList = qualityDataWriter.updateOrCreateRecord(qualityDataColumnsDto,
-									qualityDataSheet, listQualityData, effortsDtoList, listQualityData.get(0).getPhase());
-							if (!recordCreatedList.contains(Boolean.FALSE)) {
+							qualityDataWriter.updateOrCreateRecord(qualityDataColumnsDto,
+								qualityDataSheet, listQualityData);
 								Boolean flagWriteFile = Boolean.FALSE;
 								flagWriteFile = qualityDataWriter.writeToFile(destinationFilename);
 								if (flagWriteFile) {
 									LOGGER.info("Quality Data file written for Design/Code Phase!!\n\n");
 								}
-							}
 						}
 					}
 				}
@@ -109,15 +120,13 @@ public class FileServiceImpl implements FileService {
 						XSSFSheet qualityDataSheet = qualityDataWriter.readQualityFile(destinationFilename,
 								QualityDataColumnsDto);
 						if (Objects.nonNull(qualityDataSheet)) {
-							List<Boolean> recordCreatedList = qualityDataWriter.updateOrCreateRecord(QualityDataColumnsDto,
-									qualityDataSheet, listQualityData, effortsDtoList, listQualityData.get(0).getPhase());
-							if (!recordCreatedList.contains(Boolean.FALSE)) {
+							qualityDataWriter.updateOrCreateRecord(QualityDataColumnsDto,
+									qualityDataSheet, listQualityData);
 								Boolean flagWriteFile = Boolean.FALSE;
 								flagWriteFile = qualityDataWriter.writeToFile(destinationFilename);
 								if (flagWriteFile) {
 									LOGGER.info("Quality Data file written for Test Execution Phase!!\n\n");
 								}
-							}
 						}
 					}
 				}
@@ -138,21 +147,21 @@ public class FileServiceImpl implements FileService {
 						XSSFSheet qualityDataSheet = qualityDataWriter.readQualityFile(destinationFilename,
 								qualityDataColumnsDto);
 						if (Objects.nonNull(qualityDataSheet)) {
-							List<Boolean> recordCreatedList = qualityDataWriter.updateOrCreateRecord(qualityDataColumnsDto,
-									qualityDataSheet, listQualityData, effortsDtoList, listQualityData.get(0).getPhase());
-							if (!recordCreatedList.contains(Boolean.FALSE)) {
+							qualityDataWriter.updateOrCreateRecord(qualityDataColumnsDto,
+									qualityDataSheet, listQualityData);
 								Boolean flagWriteFile = Boolean.FALSE;
 								flagWriteFile = qualityDataWriter.writeToFile(destinationFilename);
 								if (flagWriteFile) {
 									LOGGER.info("Quality Data file written for Test Plan Phase!!");
 								}
-							}
 						}
 					}
 				}
 			}
+		LOGGER.info("\n\n!! Application Terminated !!");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
+			e.printStackTrace();
 		}
 
 	}

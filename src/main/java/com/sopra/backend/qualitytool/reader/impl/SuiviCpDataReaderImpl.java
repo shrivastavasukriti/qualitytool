@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sopra.backend.qualitytool.constants.ApplicationConstants;
-import com.sopra.backend.qualitytool.model.source.EffortsDto;
+import com.sopra.backend.qualitytool.model.source.QualityDataDto;
 import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDto;
 import com.sopra.backend.qualitytool.reader.SuiviCpDataReader;
 
@@ -24,6 +24,7 @@ import com.sopra.backend.qualitytool.reader.SuiviCpDataReader;
 public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SuiviCpDataReaderImpl.class);
 	private static final int NO_COLUMNS = 2;
+	private static final int NO_PHASES =5;
 
 	/**
 	 * Read and verify the contents of the readSuiviCpFile if it is ok to be
@@ -134,31 +135,65 @@ public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 	 */
 	@Override
 	public void filteringData(List<XSSFSheet> spreadSheetList, List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList,
-			List<EffortsDto> effortsDtoList) {
+			List<QualityDataDto> qualityDataDtoList) {
+
 		for (int sheetIndex = 0; sheetIndex < spreadSheetList.size(); sheetIndex++) {
 			XSSFSheet spreadSheet = spreadSheetList.get(sheetIndex);
 			SuiviCpSourceFileDto suiviCpSourceFileDto = suiviCpSourceFileDtoList.get(sheetIndex);
 			for (int cellIndex = suiviCpSourceFileDto.getAtterrissageSFDColumnIndex()
 					+ 1; cellIndex < suiviCpSourceFileDto.getConsoColumnIndex(); cellIndex++) {
 
-				EffortsDto effortsDto = new EffortsDto();
-				effortsDto.setGcu(spreadSheet.getRow(suiviCpSourceFileDto.getSourceFileFirstRow()).getCell(cellIndex)
-						.getStringCellValue());
-				effortsDto.setSfd(spreadSheet.getRow(suiviCpSourceFileDto.getSfdRowIndex()).getCell(cellIndex)
-						.getNumericCellValue());
-				effortsDto.setCode(spreadSheet.getRow(suiviCpSourceFileDto.getCodeRowIndex()).getCell(cellIndex)
-						.getNumericCellValue());
-				effortsDto.setDesign(spreadSheet.getRow(suiviCpSourceFileDto.getDesignRowIndex()).getCell(cellIndex)
-						.getNumericCellValue());
-				effortsDto.setTestPlan(spreadSheet.getRow(suiviCpSourceFileDto.getSelectDataRowIndex())
-						.getCell(cellIndex).getNumericCellValue()
-						+ spreadSheet.getRow(suiviCpSourceFileDto.getWriteTestRowIndex()).getCell(cellIndex)
-								.getNumericCellValue());
-				effortsDto.setExecuteTest(spreadSheet.getRow(suiviCpSourceFileDto.getExecuteTestRowIndex())
-						.getCell(cellIndex).getNumericCellValue()
-						+ spreadSheet.getRow(suiviCpSourceFileDto.getFixBugsRowIndex()).getCell(cellIndex)
-								.getNumericCellValue());
-				effortsDtoList.add(effortsDto);
+				for (int phaseNumber = 0; phaseNumber < NO_PHASES; phaseNumber++) {
+					QualityDataDto qualityDataDto = new QualityDataDto();
+					String[] packAndModule = spreadSheet.getSheetName().split("-");
+					String packName = packAndModule[0].trim();
+					qualityDataDto.setPack(ApplicationConstants.PACK_NAME_REGEX + packName.charAt(packName.length() - 1));
+					qualityDataDto.setModule(packAndModule[1].trim());
+
+					qualityDataDto.setGroup(spreadSheet.getRow(suiviCpSourceFileDto.getSourceFileFirstRow())
+							.getCell(cellIndex).getStringCellValue());
+
+					switch (phaseNumber) {
+					case 0:
+						/* SFD phase */
+						qualityDataDto.setPhase(ApplicationConstants.SFD_PHASE);
+						qualityDataDto.setEffort(spreadSheet.getRow(suiviCpSourceFileDto.getSfdRowIndex())
+								.getCell(cellIndex).getNumericCellValue());
+						break;
+					case 1:
+						/* Design phase */
+						qualityDataDto.setPhase(ApplicationConstants.DESIGN_PHASE);
+						qualityDataDto.setEffort(spreadSheet.getRow(suiviCpSourceFileDto.getDesignRowIndex())
+								.getCell(cellIndex).getNumericCellValue());
+						break;
+					case 2:
+						/* Code/Development phase */
+						qualityDataDto.setPhase(ApplicationConstants.CODE_PHASE);
+						qualityDataDto.setEffort(spreadSheet.getRow(suiviCpSourceFileDto.getCodeRowIndex())
+								.getCell(cellIndex).getNumericCellValue());
+						break;
+					case 3:
+						/* Test Plan phase */
+						qualityDataDto.setPhase(ApplicationConstants.TEST_PLAN_PHASE);
+						qualityDataDto.setEffort(spreadSheet.getRow(suiviCpSourceFileDto.getSelectDataRowIndex())
+								.getCell(cellIndex).getNumericCellValue()
+								+ spreadSheet.getRow(suiviCpSourceFileDto.getWriteTestRowIndex()).getCell(cellIndex)
+										.getNumericCellValue());
+						break;
+					case 4:
+						/* Test Execution phase */
+						qualityDataDto.setPhase(ApplicationConstants.TEST_EXECUTION_PHASE);
+						qualityDataDto.setEffort(spreadSheet.getRow(suiviCpSourceFileDto.getExecuteTestRowIndex())
+								.getCell(cellIndex).getNumericCellValue()
+								+ spreadSheet.getRow(suiviCpSourceFileDto.getFixBugsRowIndex()).getCell(cellIndex)
+										.getNumericCellValue());
+						break;
+
+					}
+
+					qualityDataDtoList.add(qualityDataDto);
+				}
+
 			}
 		}
 	}

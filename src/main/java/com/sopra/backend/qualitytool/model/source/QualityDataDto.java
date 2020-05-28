@@ -8,6 +8,7 @@ public class QualityDataDto {
 	private String module;
 	private String group;
 	private String phase;
+	private Double effort;
 	private Integer blocker;
 	private Integer major;
 	private Integer minor;
@@ -43,6 +44,14 @@ public class QualityDataDto {
 
 	public void setPhase(String phase) {
 		this.phase = phase;
+	}
+	
+	public Double getEffort() {
+		return effort;
+	}
+
+	public void setEffort(Double effort) {
+		this.effort = effort;
 	}
 
 	public Integer getBlocker() {
@@ -80,8 +89,9 @@ public class QualityDataDto {
 	@Override
 	public String toString() {
 		return "QualityDataDto [pack=" + pack + ", module=" + module + ", group=" + group + ", phase=" + phase
-				+ ", blocker=" + blocker + ", major=" + major + ", minor=" + minor + ", dateRecordUpdate="
-				+ dateRecordUpdate + "]";
+				+ ", effort=" + effort + ", blocker=" + blocker + ", major=" + major + ", minor=" + minor
+				+ ", dateRecordUpdate=" + dateRecordUpdate + "]";
 	}
 
+	
 }

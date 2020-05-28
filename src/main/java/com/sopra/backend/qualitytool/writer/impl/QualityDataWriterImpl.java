@@ -3,7 +3,6 @@ package com.sopra.backend.qualitytool.writer.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import com.sopra.backend.qualitytool.constants.ApplicationConstants;
 import com.sopra.backend.qualitytool.model.destination.QualityDataColumnsDto;
-import com.sopra.backend.qualitytool.model.source.EffortsDto;
 import com.sopra.backend.qualitytool.model.source.QualityDataDto;
 import com.sopra.backend.qualitytool.writer.QualityDataWriter;
 
@@ -133,20 +131,20 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 		return flagColumnFound;
 	}
 
+	
+
 	/**
 	 * Update or Create a Record for writing to Quality Data files
 	 * 
 	 * @param qualityDataColumnsDto
 	 * @param spreadsheet
 	 * @param listQualityDataDto
-	 * @param listEffortsDto
-	 * @param phase
-	 * @return flagUpdateRecord
+	 * 
 	 */
+	
 	@Override
-	public List<Boolean> updateOrCreateRecord(QualityDataColumnsDto qualityDataColumnsDto, XSSFSheet spreadsheet,
-			List<QualityDataDto> listQualityDataDto, List<EffortsDto> listEffortsDto, String phase) {
-		List<Boolean> flagUpdateRecordList = new ArrayList<>();
+	public void updateOrCreateRecord(QualityDataColumnsDto qualityDataColumnsDto, XSSFSheet spreadsheet,
+			List<QualityDataDto> listQualityDataDto) {
 		Boolean flagUpdateRecord;
 		for (QualityDataDto qualityDataDto : listQualityDataDto) {
 			flagUpdateRecord = Boolean.FALSE;
@@ -158,36 +156,36 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 							.equalsIgnoreCase(qualityDataDto.getGroup())
 							&& cellPhase.getRichStringCellValue().getString().trim()
 									.equalsIgnoreCase(qualityDataDto.getPhase())) {
-						Double efforts = null;
-						for (EffortsDto effortsDto : listEffortsDto) {
-							if (effortsDto.getGcu().equalsIgnoreCase(qualityDataDto.getGroup())) {
-								if (phase.equalsIgnoreCase(ApplicationConstants.TEST_EXECUTION_PHASE)) {
-									efforts = effortsDto.getExecuteTest();
-								} else if (phase.equalsIgnoreCase(ApplicationConstants.TEST_PLAN_PHASE)) {
-									efforts = effortsDto.getTestPlan();
-								} else if (phase.equalsIgnoreCase(ApplicationConstants.DESIGN_PHASE)) {
-									efforts = effortsDto.getDesign();
-								} else if (phase.equalsIgnoreCase(ApplicationConstants.CODE_PHASE)) {
-									efforts = effortsDto.getCode();
-								} else if (phase.equalsIgnoreCase(ApplicationConstants.SFD_PHASE)) {
-									efforts = effortsDto.getSfd();
-								}
-							}
-						}
-						System.out.println("efforts: "+efforts);
-						if (efforts != null) {
+						
+						Double efforts = qualityDataDto.getEffort();
+						if(Objects.nonNull(efforts)){
 							row.getCell(qualityDataColumnsDto.getEffortsColumnIndex()).setCellValue(efforts);
 						}
 						
-						if(efforts != null && efforts == 0.0){
-							row.getCell(qualityDataColumnsDto.getDdbdColumnIndex()).setCellType(CellType.BLANK);
+						if(Objects.nonNull(qualityDataDto.getBlocker())){
+							row.getCell(qualityDataColumnsDto.getBlockerColumnIndex())
+							.setCellValue(qualityDataDto.getBlocker());
+						}else{
+							row.getCell(qualityDataColumnsDto.getBlockerColumnIndex())
+							.setCellValue(0);
 						}
-						row.getCell(qualityDataColumnsDto.getBlockerColumnIndex())
-								.setCellValue(qualityDataDto.getBlocker());
-						row.getCell(qualityDataColumnsDto.getMajorColumnIndex())
-								.setCellValue(qualityDataDto.getMajor());
-						row.getCell(qualityDataColumnsDto.getMinorColumnIndex())
-								.setCellValue(qualityDataDto.getMinor());
+						
+						if(Objects.nonNull(qualityDataDto.getMajor())){
+							row.getCell(qualityDataColumnsDto.getMajorColumnIndex())
+							.setCellValue(qualityDataDto.getMajor());
+						}else{
+							row.getCell(qualityDataColumnsDto.getMajorColumnIndex())
+							.setCellValue(0);
+						}
+						
+						if(Objects.nonNull(qualityDataDto.getMinor())){
+							row.getCell(qualityDataColumnsDto.getMinorColumnIndex())
+							.setCellValue(qualityDataDto.getMinor());
+						}else{
+							row.getCell(qualityDataColumnsDto.getMinorColumnIndex())
+							.setCellValue(0);
+						}
+						
 						CellStyle originalStyle = row.getCell(1).getCellStyle();
 						CellStyle cellStyle = workbook.createCellStyle();
 						CreationHelper createHelper = workbook.getCreationHelper();
@@ -210,79 +208,52 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 				 * If group or phase for that group doesn't exist in excel then
 				 * create new row
 				 */
-				flagUpdateRecord = createNewRecord(qualityDataDto, qualityDataColumnsDto, spreadsheet, phase,
-						listEffortsDto);
-				flagUpdateRecordList.add(flagUpdateRecord);
+				createNewRecord(qualityDataDto, qualityDataColumnsDto, spreadsheet);
 
 			}
 		}
-		return flagUpdateRecordList;
 
 	}
 
+	
 	/**
 	 * Creates new row in Quality Data if Group and/or Phase not found
 	 * 
 	 * @param qualityDataDto
 	 * @param qualityDataColumnsDto
 	 * @param spreadsheet
-	 * @param phase
-	 * @param listEffortsDto
-	 * @return
+	 * 
 	 */
-	private Boolean createNewRecord(QualityDataDto qualityDataDto, QualityDataColumnsDto qualityDataColumnsDto,
-			XSSFSheet spreadsheet, String phase, List<EffortsDto> listEffortsDto) {
+	private void createNewRecord(QualityDataDto qualityDataDto, QualityDataColumnsDto qualityDataColumnsDto,
+			XSSFSheet spreadsheet) {
 		XSSFRow lastRow = spreadsheet.getRow(spreadsheet.getLastRowNum());
 		XSSFRow newRow = spreadsheet.createRow(lastRow.getRowNum() + 1);
 		CellStyle originalStringStyle = lastRow.getCell(qualityDataColumnsDto.getPackColumnIndex()).getCellStyle();
 		CellStyle originalNumericStyle = lastRow.getCell(qualityDataColumnsDto.getBlockerColumnIndex()).getCellStyle();
 		CellStyle cellStyle = workbook.createCellStyle();
 		CellStyle numericCellStyle = workbook.createCellStyle();
-		Integer numberOfCellsInserted = 0;
 		for (Integer cellid = 0; cellid < lastRow.getLastCellNum(); cellid++) {
 			Cell cell = newRow.createCell(cellid);
 			if (cellid == qualityDataColumnsDto.getPackColumnIndex()) {
 				cell.setCellValue((String) qualityDataDto.getPack());
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getModuleColumnIndex()) {
 				cell.setCellValue((String) qualityDataDto.getModule());
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getGroupColumnIndex()) {
 				cell.setCellValue((String) qualityDataDto.getGroup());
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getPhaseColumnIndex()) {
 				cell.setCellValue((String) qualityDataDto.getPhase());
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getEffortsColumnIndex()) {
-				Double efforts = null;
-				for (EffortsDto effortsDto : listEffortsDto) {
-					if (effortsDto.getGcu().equalsIgnoreCase(qualityDataDto.getGroup())) {
-						if (phase.equalsIgnoreCase(ApplicationConstants.TEST_EXECUTION_PHASE)) {
-							efforts = effortsDto.getExecuteTest();
-						} else if (phase.equalsIgnoreCase(ApplicationConstants.TEST_PLAN_PHASE)) {
-							efforts = effortsDto.getTestPlan();
-						} else if (phase.equalsIgnoreCase(ApplicationConstants.DESIGN_PHASE)) {
-							efforts = effortsDto.getDesign();
-						} else if (phase.equalsIgnoreCase(ApplicationConstants.CODE_PHASE)) {
-							efforts = effortsDto.getCode();
-						} else if (phase.equalsIgnoreCase(ApplicationConstants.SFD_PHASE)) {
-							efforts = effortsDto.getSfd();
-						}
-					}
-				}
+				
+				Double efforts = qualityDataDto.getEffort();
 				if (efforts != null) {
 					cell.setCellValue(efforts);
 				}
-				numberOfCellsInserted++;
-			} else if (cellid == qualityDataColumnsDto.getBlockerColumnIndex()) {
+			} else if (cellid == qualityDataColumnsDto.getBlockerColumnIndex() && Objects.nonNull(qualityDataDto.getBlocker())) {
 				cell.setCellValue(qualityDataDto.getBlocker());
-				numberOfCellsInserted++;
-			} else if (cellid == qualityDataColumnsDto.getMajorColumnIndex()) {
+			} else if (cellid == qualityDataColumnsDto.getMajorColumnIndex() && Objects.nonNull(qualityDataDto.getMajor())) {
 				cell.setCellValue(qualityDataDto.getMajor());
-				numberOfCellsInserted++;
-			} else if (cellid == qualityDataColumnsDto.getMinorColumnIndex()) {
+			} else if (cellid == qualityDataColumnsDto.getMinorColumnIndex() && Objects.nonNull(qualityDataDto.getMinor())) {
 				cell.setCellValue(qualityDataDto.getMinor());
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getDdbdColumnIndex()) {
 				CellAddress blockerCellAddress = newRow.getCell(qualityDataColumnsDto.getBlockerColumnIndex())
 						.getAddress();
@@ -294,7 +265,6 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 					cell.setCellFormula("(" + blockerCellAddress + "*1+" + majorCellAddress + "*0.5+" + minorCellAddress
 							+ "*0.25)/" + effortsCellAddress + "*10");
 				}
-				numberOfCellsInserted++;
 			} else if (cellid == qualityDataColumnsDto.getRecordUpdatedColumnIndex()) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -302,7 +272,6 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 				calendar.set(Calendar.SECOND, 0);
 				calendar.set(Calendar.MILLISECOND, 0);
 				cell.setCellValue(calendar.getTime());
-				numberOfCellsInserted++;
 			}
 
 			if (cellid == qualityDataColumnsDto.getBlockerColumnIndex()
@@ -323,10 +292,6 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 				cell.setCellStyle(cellStyle);
 			}
 		}
-		if (numberOfCellsInserted == 10) {
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -346,5 +311,7 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 		}
 		return flagWrite;
 	}
+	
+	
 
 }

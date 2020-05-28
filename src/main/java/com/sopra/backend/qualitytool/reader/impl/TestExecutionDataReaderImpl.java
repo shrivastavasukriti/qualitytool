@@ -124,10 +124,13 @@ public class TestExecutionDataReaderImpl implements TestExecutionDataReader {
 								&& !(cell.getStringCellValue().trim().isEmpty())) {
 							switch (cell.getStringCellValue().trim().charAt(0)) {
 							case '3':
-								major++;
+								minor++;
 								break;
 							case '4':
 								minor++;
+								break;
+							case '2':
+								major++;
 								break;
 							case '1':
 								blocker++;
@@ -148,10 +151,13 @@ public class TestExecutionDataReaderImpl implements TestExecutionDataReader {
 								&& !(cell.getStringCellValue().trim().isEmpty())) {
 							switch (cell.getStringCellValue().trim().charAt(0)) {
 							case '3':
-								major++;
+								minor++;
 								break;
 							case '4':
 								minor++;
+								break;
+							case '2':
+								major++;
 								break;
 							case '1':
 								blocker++;
