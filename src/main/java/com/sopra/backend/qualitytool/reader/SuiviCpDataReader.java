@@ -5,13 +5,13 @@ import java.util.List;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import com.sopra.backend.qualitytool.model.source.QualityDataDto;
-import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDto;
+import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDtoWrapper;
 
 public interface SuiviCpDataReader {
 
-	public List<XSSFSheet> readSuiviCpFile(String file, List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList);
+	public List<XSSFSheet> readSuiviCpFile(String file, SuiviCpSourceFileDtoWrapper suiviCpSourceFileDtoWrapper);
 
-	public void filteringData(List<XSSFSheet> spreadSheetList, List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList,
+	public void filteringData(List<XSSFSheet> spreadSheetList, SuiviCpSourceFileDtoWrapper suiviCpSourceFileDtoWrapper,
 			List<QualityDataDto> qualityDataDtoList);
 
 }

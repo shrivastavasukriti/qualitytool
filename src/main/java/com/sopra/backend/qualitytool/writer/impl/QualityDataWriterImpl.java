@@ -161,6 +161,9 @@ public class QualityDataWriterImpl implements QualityDataWriter {
 						if(Objects.nonNull(efforts)){
 							row.getCell(qualityDataColumnsDto.getEffortsColumnIndex()).setCellValue(efforts);
 						}
+						if(Objects.nonNull(efforts) && efforts == 0){
+							row.getCell(qualityDataColumnsDto.getDdbdColumnIndex()).setCellType(CellType.BLANK);
+						}
 						
 						if(Objects.nonNull(qualityDataDto.getBlocker())){
 							row.getCell(qualityDataColumnsDto.getBlockerColumnIndex())

@@ -16,7 +16,7 @@ import com.sopra.backend.qualitytool.dto.FileDto;
 import com.sopra.backend.qualitytool.model.destination.QualityDataColumnsDto;
 import com.sopra.backend.qualitytool.model.source.DesignReviewSourceFileDto;
 import com.sopra.backend.qualitytool.model.source.QualityDataDto;
-import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDto;
+import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDtoWrapper;
 import com.sopra.backend.qualitytool.model.source.TestExecutionSourceFileDto;
 import com.sopra.backend.qualitytool.model.source.TestPlanSourceFileDto;
 import com.sopra.backend.qualitytool.reader.DesignReviewDataReader;
@@ -50,15 +50,17 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public void processQualityData(FileDto fileDto) {
 		try {
+			
 			if (Objects.nonNull(fileDto.getSuiviCpFilePath())) {
 				List<QualityDataDto> listQualityData = new ArrayList<>();
-				List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList = new ArrayList<>();
+				SuiviCpSourceFileDtoWrapper suiviCpSourceFileDtoWrapper = new SuiviCpSourceFileDtoWrapper();
+				
 				/* Reading and verifying SuiviCp file */
 				List<XSSFSheet> suiviCPspreadsheetList = suiviCpDataReader.readSuiviCpFile(fileDto.getSuiviCpFilePath(),
-						suiviCpSourceFileDtoList);
+						suiviCpSourceFileDtoWrapper);
 				if (Objects.nonNull(suiviCPspreadsheetList) && suiviCPspreadsheetList.size() > 0) {
 					LOGGER.info("Suivi Cp file read successfully !!!\n\n");
-					suiviCpDataReader.filteringData(suiviCPspreadsheetList, suiviCpSourceFileDtoList, listQualityData);
+					suiviCpDataReader.filteringData(suiviCPspreadsheetList, suiviCpSourceFileDtoWrapper, listQualityData);
 				}
 				LOGGER.info("Suivi Cp file filtered !!!");
 				QualityDataColumnsDto qualityDataColumnsDto = new QualityDataColumnsDto();

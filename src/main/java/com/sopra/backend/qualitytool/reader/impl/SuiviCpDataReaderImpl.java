@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sopra.backend.qualitytool.constants.ApplicationConstants;
 import com.sopra.backend.qualitytool.model.source.QualityDataDto;
 import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDto;
+import com.sopra.backend.qualitytool.model.source.SuiviCpSourceFileDtoWrapper;
 import com.sopra.backend.qualitytool.reader.SuiviCpDataReader;
 
 @Service
@@ -35,10 +36,11 @@ public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 	 * @return spreadsheetList
 	 */
 	@Override
-	public List<XSSFSheet> readSuiviCpFile(String file, List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList) {
+	public List<XSSFSheet> readSuiviCpFile(String file, SuiviCpSourceFileDtoWrapper suiviCpSourceFileDtoWrapper) {
 		List<XSSFSheet> spreadsheetList = new ArrayList<>();
 		try (FileInputStream fis = new FileInputStream(new File(file));
 				XSSFWorkbook workbook = new XSSFWorkbook(fis);) {
+			List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList = new ArrayList<>();
 			for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++) {
 				XSSFSheet sheet = workbook.getSheetAt(sheetIndex);
 				Boolean flagColumnIndex = verifyColumnAndRowIndices(sheet, suiviCpSourceFileDtoList);
@@ -48,6 +50,7 @@ public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 					spreadsheetList.add(sheet);
 				}
 			}
+			suiviCpSourceFileDtoWrapper.setSuiviCpSourceFileDtoList(suiviCpSourceFileDtoList);
 
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
@@ -134,9 +137,9 @@ public class SuiviCpDataReaderImpl implements SuiviCpDataReader {
 	 * 
 	 */
 	@Override
-	public void filteringData(List<XSSFSheet> spreadSheetList, List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList,
+	public void filteringData(List<XSSFSheet> spreadSheetList, SuiviCpSourceFileDtoWrapper suiviCpSourceFileDtoWrapper,
 			List<QualityDataDto> qualityDataDtoList) {
-
+		List<SuiviCpSourceFileDto> suiviCpSourceFileDtoList = suiviCpSourceFileDtoWrapper.getSuiviCpSourceFileDtoList();
 		for (int sheetIndex = 0; sheetIndex < spreadSheetList.size(); sheetIndex++) {
 			XSSFSheet spreadSheet = spreadSheetList.get(sheetIndex);
 			SuiviCpSourceFileDto suiviCpSourceFileDto = suiviCpSourceFileDtoList.get(sheetIndex);
