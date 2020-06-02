@@ -4,9 +4,9 @@ import com.sopra.backend.qualitytool.dto.FileDto;
 
 public interface FileService {
 	/**
-	 * Method to process files for Quality Data
+	 * Method to read folder and extract file names for processing Quality Data 
 	 * 
 	 * @param fileDto
 	 */
-	public void processQualityData(FileDto fileDto);
+	public void inputFolderPaths(FileDto fileDto);
 }
