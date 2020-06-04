@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sopra.backend.qualitytool.controller.FileController;
 import com.sopra.backend.qualitytool.dto.FileDto;
 import com.sopra.backend.qualitytool.model.destination.QualityDataColumnsDto;
 import com.sopra.backend.qualitytool.model.source.DesignReviewSourceFileDto;
@@ -28,7 +27,7 @@ import com.sopra.backend.qualitytool.writer.QualityDataWriter;
 
 @Service
 public class FileServiceImpl implements FileService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileServiceImpl.class);
 
 	@Autowired
 	private DesignReviewDataReader designReviewDataReader;
@@ -158,7 +157,7 @@ public class FileServiceImpl implements FileService {
 					}
 				}
 			}
-		LOGGER.info("\n\n!! Application Terminated !!");
+		LOGGER.info("\n\n!! Quality Data Processed !!");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			e.printStackTrace();
